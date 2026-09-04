@@ -11,6 +11,8 @@ Specifications:
        3. KNN k=4
        4. KNN k=6
        5. KNN k=8
+       3. KNN k=5
+       4. KNN k=8
   B) Terrain control:
        6. Queen + log1p(Mean_Slope_deg)  [from SRTM zonal stats]
 
@@ -100,11 +102,8 @@ with warnings.catch_warnings():
     w_rook = libpysal.weights.Rook.from_shapefile(TMP_SHP)
 w_rook.transform = "r"
 
-w_knn4 = libpysal.weights.KNN.from_shapefile(TMP_SHP, k=4)
-w_knn4.transform = "r"
-
-w_knn6 = libpysal.weights.KNN.from_shapefile(TMP_SHP, k=6)
-w_knn6.transform = "r"
+w_knn5 = libpysal.weights.KNN.from_shapefile(TMP_SHP, k=5)
+w_knn5.transform = "r"
 
 w_knn8 = libpysal.weights.KNN.from_shapefile(TMP_SHP, k=8)
 w_knn8.transform = "r"
