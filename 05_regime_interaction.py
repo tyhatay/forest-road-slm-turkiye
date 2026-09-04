@@ -171,7 +171,7 @@ lines = [
     sep,
 ]
 for q_val, cnt in cluster_counts.items():
-    label = {0:"NS", 1:"HH", 2:"LH", 3:"LL", 4:"HL"}.get(q_val, str(q_val))
+    label = {0:"NS", 1:"HH", 2:"LL", 3:"LH", 4:"HL"}.get(q_val, str(q_val))
     lines.append(f"  q={q_val}  {label}: {cnt} provinces")
 lines += [
     f"  → HH dummy: {n_HH} provinces assigned 1 (Black Sea production corridor)",
