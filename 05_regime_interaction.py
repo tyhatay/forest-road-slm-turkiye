@@ -62,7 +62,7 @@ cluster_counts = pd.Series(clusters).value_counts().sort_index()
 print("\nLISA cluster distribution (q; 0=NS):")
 for q_val, cnt in cluster_counts.items():
     label = {0:"NS (not significant)", 1:"HH (high-high)",
-             2:"LH (low-high)", 3:"LL (low-low)", 4:"HL (high-low)"}.get(q_val, str(q_val))
+             2:"LL (low-low)", 3:"LH (low-high)", 4:"HL (high-low)"}.get(q_val, str(q_val))
     print(f"  q={q_val}  {label}: {cnt} provinces")
 
 # HH dummy: 1 = HH province, 0 = all others
