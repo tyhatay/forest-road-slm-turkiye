@@ -2,7 +2,9 @@
 
 Replication code for:
 
-> xxxx, x. x. (2026). **Spatially Structured Forest Infrastructure Investment and Provincial Governance Implications in Türkiye.** *xxxxxxxx*. https://doi.org/[ZENODO_DOI]
+> xxxx, x. x. (2026). **Spatially Structured Forest Infrastructure Investment and Provincial Governance Implications in Türkiye.** *xxxxxxxx*.
+> version DOI:(https://doi.org/10.5281/zenodo.22288998)
+> all version DOI: (https://doi.org/10.5281/zenodo.22288997)
 
 ---
 
