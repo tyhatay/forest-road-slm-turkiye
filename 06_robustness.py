@@ -109,8 +109,7 @@ w_knn8 = libpysal.weights.KNN.from_shapefile(TMP_SHP, k=8)
 w_knn8.transform = "r"
 
 print(f"  Rook: {w_rook.n} units, avg neighbors: {np.mean(list(w_rook.cardinalities.values())):.2f}")
-print(f"  KNN4: {w_knn4.n} units, avg neighbors: {np.mean(list(w_knn4.cardinalities.values())):.2f}")
-print(f"  KNN6: {w_knn6.n} units, avg neighbors: {np.mean(list(w_knn6.cardinalities.values())):.2f}")
+print(f"  KNN5: {w_knn5.n} units, avg neighbors: {np.mean(list(w_knn5.cardinalities.values())):.2f}")
 print(f"  KNN8: {w_knn8.n} units, avg neighbors: {np.mean(list(w_knn8.cardinalities.values())):.2f}")
 
 # ── Terrain slope control ──────────────────────────────────────────────────────
@@ -132,8 +131,7 @@ XCOLS_slope = X_COLS + ["Slope_log"]
 specs = [
     ("Queen (baseline)",  w_queen, X,       X_COLS),
     ("Rook contiguity",   w_rook,  X,       X_COLS),
-    ("KNN k=4",           w_knn4,  X,       X_COLS),
-    ("KNN k=6",           w_knn6,  X,       X_COLS),
+    ("KNN k=5",           w_knn5,  X,       X_COLS)
     ("KNN k=8",           w_knn8,  X,       X_COLS),
     ("Queen + Slope",     w_queen, X_slope, XCOLS_slope),
 ]
