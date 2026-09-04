@@ -1,4 +1,4 @@
-# Forest Road Spatial Lag Model — Türkiye
+# Forest Road Spatial Lag Model - Türkiye
 
 Replication code for:
 
