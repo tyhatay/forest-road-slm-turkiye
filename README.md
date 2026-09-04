@@ -115,7 +115,7 @@ If you use this code or data, please cite the paper and the repository:
   title   = {Spatially Structured Forest Infrastructure Investment and Provincial Governance Implications in Türkiye},
   journal = {xxxxxxxx},
   year    = {2026},
-  doi     = {[ZENODO_DOI]}
+  doi     = {10.5281/zenodo.22288998)}
 }
 ```
 
