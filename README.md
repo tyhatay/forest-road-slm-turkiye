@@ -1,4 +1,4 @@
-# Forest Road Spatial Lag Model - Türkiye
+# Forest Road Spatial Lag Model — Türkiye
 
 Replication code for:
 
@@ -26,13 +26,19 @@ forest-road-slm-turkiye/
 ├── data/
 │   ├── veri.xlsx            # Provincial forestry statistics, 81 provinces × 8 years (2017–2024)
 │   └── turkiye_il.*         # Province boundary shapefile (OpenStreetMap contributors, ODbL)
-├── 01_main_slm.py           # ESDA, LISA, LM tests, SLM estimation, impacts
-├── 03_vif_standardized.py   # VIF table and standardized beta-weights
-├── 04_panel_resm.py         # Panel FE-SLM, RE-SLM, Hausman test
-├── 05_regime_interaction.py # LISA cluster map, regime interaction LR test
-├── 06_robustness.py         # Alternative weights matrices, terrain robustness
-├── 07_sdm_lr_test.py        # Formal SDM vs. SLM likelihood-ratio test
-├── data_loader.py           # Shared data loading utilities
+├── 01_main_slm.py             # ESDA, LISA, LM tests, SLM estimation, MC impacts
+├── 03_vif_standardized.py     # VIF table and standardized beta-weights
+├── 04_panel_resm.py           # Panel FE-SLM, RE-SLM, Hausman test (df=6)
+├── 05_regime_interaction.py   # LISA cluster maps, regime interaction LR test
+├── 06_robustness.py           # Alternative weights matrices, terrain robustness
+├── 06b_knn_sensitivity.py     # KNN degree vs UTM projected sensitivity
+├── 07_sdm_lr_test.py          # Formal SDM vs. SLM LR test + MC impact decomposition
+├── 08_variance_decomp.py      # Between/within variance decomposition (Table S1)
+├── 09_region_fe_blacksea.py   # Regional FE + Black Sea exclusion sensitivity (Table S7)
+├── 10_supply_demand_test.py   # Joint supply-vs-demand LR and Wald tests
+├── 11_yearly_lisa.py          # Per-year LISA cluster table 2017-2024 (Table S8)
+├── 12_fdr_lisa.py             # Benjamini-Hochberg FDR correction on LISA p-values (Table S9)
+├── data_loader.py             # Shared data loading utilities
 ├── requirements.txt
 └── README.md
 ```
@@ -74,20 +80,36 @@ Core dependencies: `geopandas`, `spreg`, `libpysal`, `esda`, `matplotlib`, `pand
 
 ---
 
+## Version History
+
+| Version | Description |
+|---|---|
+| v1.0.0 | Initial submission |
+| v1.0.1 | Revision 2: ADI formula corrected (trace formula); Panel RE ρ corrected (time-major stacking); KNN weights reprojected to UTM Zone 36N (EPSG:32636); Table S2 expanded to 11 predictors |
+| v1.0.2 | Revision 3 (current): New scripts 06b, 08–12 added; `07_sdm_lr_test.py` extended with SDM MC impact decomposition; `statsmodels` added to requirements for BH-FDR correction (`12_fdr_lisa.py`) and Breusch-Pagan test (`01_main_slm.py`) |
+
+---
+
 ## How to Run
 
 Run scripts in numbered order. Each script reads from `data/` and writes to `output/`.
 
 ```bash
-python 01_main_slm.py        # Baseline SLM, LISA, LM tests, impacts table
-python 03_vif_standardized.py  # VIF table, standardized betas
-python 04_panel_resm.py      # Panel FE/RE SLM, Hausman test
-python 05_regime_interaction.py  # LISA cluster maps, interaction LR test
-python 06_robustness.py      # Weights matrix robustness, terrain control
-python 07_sdm_lr_test.py     # Formal SDM vs. SLM LR test
+python 01_main_slm.py              # Baseline SLM, LISA, LM tests, MC impacts
+python 03_vif_standardized.py      # VIF table, standardized betas
+python 04_panel_resm.py            # Panel FE/RE SLM, Hausman test
+python 05_regime_interaction.py    # LISA cluster maps, interaction LR test
+python 06_robustness.py            # Weights matrix robustness, terrain control
+python 06b_knn_sensitivity.py      # KNN degree vs. UTM sensitivity
+python 07_sdm_lr_test.py           # SDM vs. SLM LR test + MC impact decomposition
+python 08_variance_decomp.py       # Between/within variance decomposition
+python 09_region_fe_blacksea.py    # Regional FE + Black Sea exclusion sensitivity
+python 10_supply_demand_test.py    # Joint supply-vs-demand LR and Wald tests
+python 11_yearly_lisa.py           # Per-year LISA cluster table 2017-2024
+python 12_fdr_lisa.py              # FDR-adjusted LISA (Benjamini-Hochberg)
 ```
 
-All outputs are saved to `output/` as `.txt` files. Runtime: approximately 5–10 minutes total on a standard desktop (the panel script is slowest).
+All outputs are saved to `output/` as `.csv` and `.txt` files. Runtime: approximately 10–15 minutes total on a standard desktop (panel script and MC impact loops are slowest).
 
 ---
 

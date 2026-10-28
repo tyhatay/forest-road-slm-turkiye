@@ -141,6 +141,58 @@ wx_se = se_sdm[wx_start : wx_start + k]
 n_sig_wx = int((wx_p < 0.05).sum())
 print(f"\n  Significant WX terms (p<0.05): {n_sig_wx} / {k}")
 
+# ── SDM Monte Carlo impacts (LeSage & Pace 2009) ─────────────────────────────
+# S_j = (I - rho*W)^{-1} @ (beta_j*I + gamma_j*W)
+# Direct_j  = n^{-1} * trace(S_j)
+# Total_j   = n^{-1} * sum(S_j)
+# Indirect_j = Total_j - Direct_j
+DRAWS_SDM, SEED_SDM = 10_000, 42
+print(f"\nComputing SDM MC impacts ({DRAWS_SDM:,} draws, seed={SEED_SDM}) ...")
+np.random.seed(SEED_SDM)
+
+n = w.n
+W_full = w.full()[0]
+I_n = np.eye(n)
+
+all_draws_sdm = np.random.multivariate_normal(betas_sdm, sdm.vm, size=DRAWS_SDM)
+rho_idx_sdm = 1 + 2 * k   # index of rho in betas_sdm
+
+dir_sdm = np.zeros((DRAWS_SDM, k))
+ind_sdm = np.zeros((DRAWS_SDM, k))
+tot_sdm = np.zeros((DRAWS_SDM, k))
+
+for d in range(DRAWS_SDM):
+    rho_d = float(all_draws_sdm[d, rho_idx_sdm])
+    try:
+        S = np.linalg.inv(I_n - rho_d * W_full)
+    except np.linalg.LinAlgError:
+        continue
+    for j in range(k):
+        beta_j  = float(all_draws_sdm[d, 1 + j])
+        gamma_j = float(all_draws_sdm[d, 1 + k + j])
+        S_j = S @ (beta_j * I_n + gamma_j * W_full)
+        dir_sdm[d, j] = np.trace(S_j) / n
+        tot_sdm[d, j] = S_j.sum() / n
+        ind_sdm[d, j] = tot_sdm[d, j] - dir_sdm[d, j]
+
+sdm_imp_rows = []
+for j, col in enumerate(X_COLS):
+    lo = float(np.percentile(tot_sdm[:, j], 2.5))
+    hi = float(np.percentile(tot_sdm[:, j], 97.5))
+    p_s = max(min(2*(tot_sdm[:, j] <= 0).mean(), 2*(tot_sdm[:, j] >= 0).mean()), 1/DRAWS_SDM)
+    sdm_imp_rows.append({
+        "Variable":  col,
+        "Direct":    float(dir_sdm[:, j].mean()),
+        "Indirect":  float(ind_sdm[:, j].mean()),
+        "Total":     float(tot_sdm[:, j].mean()),
+        "CI_lo": lo, "CI_hi": hi,
+        "p_sim": float(p_s), "Sig": stars(p_s),
+    })
+
+sdm_imp_df = pd.DataFrame(sdm_imp_rows)
+sdm_imp_df.to_csv(os.path.join(OUT_DIR, "07_sdm_impacts.csv"), index=False, float_format="%.6f")
+print(f"SDM impacts saved.")
+
 # ── Report ─────────────────────────────────────────────────────────────────────
 SEP = "=" * 78
 sep = "-" * 78

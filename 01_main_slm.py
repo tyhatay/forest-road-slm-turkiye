@@ -19,6 +19,11 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 from spreg import ML_Lag
+try:
+    from statsmodels.stats.diagnostic import het_breuschpagan
+    _HAS_SM = True
+except ImportError:
+    _HAS_SM = False
 
 # ── shared pipeline ───────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -98,8 +103,31 @@ imp_df = pd.DataFrame(imp_rows)
 # ── scalar multipliers ────────────────────────────────────────────────────────
 rho_pt = float(slm.rho)
 ATI = 1 / (1 - rho_pt)
-ADI = 1 + rho_pt * float(W_full.mean())
+S_pt = np.linalg.inv(I_n - rho_pt * W_full)   # spatial multiplier at point estimate
+ADI = float(np.trace(S_pt)) / n               # n^{-1} tr[(I - rhoW)^{-1}]
 AII = ATI - ADI
+
+# ── heteroskedasticity test (Breusch-Pagan, on SLM residuals) ─────────────────
+# Figure 5B uses slm.predy (standard fitted values = Xβ + ρWy).
+# slm.predy_e (reduced-form) is used only for Spatial Pseudo R².
+residuals = slm.u.flatten()
+if _HAS_SM:
+    X_aug = np.column_stack([np.ones(n), X])
+    bp_lm, bp_p, f_stat, f_p = het_breuschpagan(residuals, X_aug)
+    het_note = (f"Breusch-Pagan LM = {bp_lm:.4f} (p = {bp_p:.4f}), "
+                f"F = {f_stat:.4f} (p = {f_p:.4f})")
+else:
+    # manual BP: regress residuals^2 on X
+    e2 = residuals**2
+    X_aug = np.column_stack([np.ones(n), X])
+    b_bp = np.linalg.lstsq(X_aug, e2, rcond=None)[0]
+    e2_hat = X_aug @ b_bp
+    ss_res = ((e2 - e2_hat)**2).sum()
+    ss_tot = ((e2 - e2.mean())**2).sum()
+    r2_bp = 1 - ss_res/ss_tot
+    bp_lm = n * r2_bp
+    bp_p = float(1 - scipy.stats.chi2.cdf(bp_lm, df=len(X_COLS)))
+    het_note = f"Breusch-Pagan LM = {bp_lm:.4f} (p = {bp_p:.4f}, chi²({len(X_COLS)}))"
 
 # ── save CSVs ─────────────────────────────────────────────────────────────────
 coef_df.to_csv(os.path.join(OUT_DIR, "01_slm_coefficients.csv"), index=False, float_format="%.6f")
@@ -146,7 +174,16 @@ for _, r in imp_df.iterrows():
         f"{r['Total']:10.5f}  {ci:>24}  {r['p_sim']:.4f} {r['Sig']}"
     )
 
-lines += ["", f"Multipliers: ATI={ATI:.4f}  ADI={ADI:.4f}  AII={AII:.4f}", SEP]
+lines += [
+    "",
+    f"Multipliers: ATI={ATI:.4f}  ADI={ADI:.4f}  AII={AII:.4f}",
+    f"  ADI = n^{{-1}} tr[(I-rhoW)^{{-1}}]  (corrected from point-estimate multiplier matrix)",
+    "",
+    "HETEROSKEDASTICITY DIAGNOSTICS (Figure 5B uses slm.predy = Xb + rhoWy)",
+    sep,
+    f"  {het_note}",
+    SEP,
+]
 report = "\n".join(lines)
 
 out_txt = os.path.join(OUT_DIR, "01_slm_results.txt")
