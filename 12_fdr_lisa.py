@@ -35,9 +35,9 @@ y = df[Y_COL].values
 lisa = Moran_Local(y, w, permutations=999, geoda_quads=True, seed=SEED)
 
 p_sim   = lisa.p_sim          # shape (n,)
-q_vals  = lisa.q              # 1=HH, 2=LH, 3=LL, 4=HL
+q_vals  = lisa.q              # geoda_quads=True: 1=HH, 2=LL, 3=LH, 4=HL
 
-QUAD_LABEL = {0: "NS", 1: "HH", 2: "LH", 3: "LL", 4: "HL"}
+QUAD_LABEL = {0: "NS", 1: "HH", 2: "LL", 3: "LH", 4: "HL"}
 
 # ── Uncorrected clusters (p < 0.05) ──────────────────────────────────────────
 sig_uncorr  = p_sim < FDR_ALPHA
