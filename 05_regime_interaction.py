@@ -54,7 +54,7 @@ SEED = 42
 y_lisa = df[Y_COL].values
 lisa   = Moran_Local(y_lisa, w, permutations=999, geoda_quads=True, seed=SEED)
 
-# q: 1=HH, 2=LH, 3=LL, 4=HL; p_sim < 0.05 → significant
+# geoda_quads=True: q=1=HH, q=2=LL, q=3=LH, q=4=HL; p_sim < 0.05 → significant
 clusters = np.where(lisa.p_sim < 0.05, lisa.q, 0)   # 0 = not significant
 df["LISA_q"] = clusters
 
